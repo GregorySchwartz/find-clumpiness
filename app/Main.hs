@@ -83,8 +83,9 @@ decodeLineageTree contents = fromMaybe
 getLineageTree :: Label -> Object -> Tree NodeLabel
 getLineageTree label object = either error (lineageToTree label)
                             . flip AT.parseEither object $ \obj -> do
-                                tree <- obj .: T.pack "tree"
-                                return tree 
+                                germTree <- obj .: T.pack "tree"
+                                [tree]   <- germTree .: T.pack "children"
+                                return tree
 
 findClumpiness :: Options -> IO ()
 findClumpiness opts = do
@@ -100,8 +101,8 @@ findClumpiness opts = do
                             Lineage x -> getLineageTree x
                                        . decodeLineageTree
                                        $ contents
-        inputSuperTree = filterExclusiveTree (inputExclusivity opts)
-                       . convertToSuperTree
+        inputSuperTree = convertToSuperTree
+                       . filterExclusiveTree (inputExclusivity opts)
                        . innerToLeaves
                        $ inputTree
         propertyMap    = getPropertyMap inputSuperTree

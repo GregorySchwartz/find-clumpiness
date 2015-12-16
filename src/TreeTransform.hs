@@ -36,17 +36,16 @@ convertToSuperTree = toSuperNodeTree SuperRoot
 -- | Convert inner nodes with labels to leaves
 innerToLeaves :: Tree NodeLabel -> Tree NodeLabel
 innerToLeaves n@(Node { subForest = [] }) = n
-innerToLeaves n@( Node { rootLabel = NodeLabel { nodeID     = x
-                                               , nodeLabels = (Seq.null -> True)
+innerToLeaves n@( Node { rootLabel = NodeLabel { nodeLabels = (Seq.null -> True)
                                                }
                        }
                 ) = n { subForest = map innerToLeaves . subForest $ n }
-innerToLeaves n@( Node { rootLabel = NodeLabel { nodeID = x, nodeLabels = y }
+innerToLeaves n@( Node { rootLabel = NodeLabel { nodeID = x }
                        , subForest = xs
                        }
                 ) =
     Node { rootLabel = NodeLabel {nodeID = T.cons 'S' x, nodeLabels = Seq.empty}
-         , subForest = (n { subForest = [] }) : xs
+         , subForest = (n { subForest = [] }) : map innerToLeaves xs
          }
 
 -- | Get the PropertyMap of a SuperNodeTree, ignoring nodes that have no
@@ -59,19 +58,14 @@ getPropertyMap = Map.fromList
 
 -- | Change labels to be exclusive or not
 filterExclusiveTree :: Exclusivity
-                    -> Tree (SuperNode NodeLabel)
-                    -> Tree (SuperNode NodeLabel)
+                    -> Tree NodeLabel
+                    -> Tree NodeLabel
 filterExclusiveTree ex n =
-    n { rootLabel
-      = (rootLabel n) { myRootLabel
-                      = (myRootLabel . rootLabel $ n) { nodeLabels
-                                                      = exclusiveLabel ex
-                                                      . nodeLabels
-                                                      . myRootLabel
-                                                      . rootLabel
-                                                      $ n
-                                                      }
-                      }
+    n { rootLabel = (rootLabel n) { nodeLabels = exclusiveLabel ex
+                                               . nodeLabels
+                                               . rootLabel
+                                               $ n
+                                  }
       , subForest = map (filterExclusiveTree ex) . subForest $ n
       }
 
