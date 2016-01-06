@@ -84,8 +84,13 @@ getLineageTree :: Label -> Object -> Tree NodeLabel
 getLineageTree label object = either error (lineageToTree label)
                             . flip AT.parseEither object $ \obj -> do
                                 germTree <- obj .: T.pack "tree"
-                                [tree]   <- germTree .: T.pack "children"
-                                return tree
+                                tree <- germTree .: T.pack "children"
+                                return . rootCheck tree $ germTree
+  where
+    -- Get the first branch point (sometimes there are additional nodes
+    -- right after the root for lineages that bypass the no root rule).
+    rootCheck [tree] _ = tree
+    rootCheck _ tree   = tree
 
 findClumpiness :: Options -> IO ()
 findClumpiness opts = do
