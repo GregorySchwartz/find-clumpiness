@@ -17,6 +17,7 @@ module TreeTransform
 -- Standard
 import qualified Data.Map.Strict as Map
 import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
 import Data.Tree
 import qualified Data.Foldable as F
 import Data.Function (on)
@@ -72,10 +73,14 @@ filterExclusiveTree ex n =
 -- | Transform the labels to be exclusive, non exclusive, or majority ruled
 exclusiveLabel :: Exclusivity -> Labels -> Labels
 exclusiveLabel _ (Seq.null -> True) = Seq.empty
-exclusiveLabel AllExclusive xs      = xs
-exclusiveLabel Exclusive xs         = if Seq.length xs > 1
-                                        then Seq.empty
-                                        else xs
+exclusiveLabel AllExclusive xs      =
+    Seq.fromList . Set.toList . Set.fromList . F.toList $ xs
+exclusiveLabel Exclusive xs         =
+    if Seq.length uniqueSeq > 1
+        then Seq.empty
+        else uniqueSeq
+  where
+    uniqueSeq = Seq.fromList . Set.toList . Set.fromList . F.toList $ xs
 exclusiveLabel Majority xs          = Seq.singleton
                                     . fst
                                     . F.maximumBy (compare `on` snd)
