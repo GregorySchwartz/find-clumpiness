@@ -15,7 +15,6 @@ import Options.Applicative
 import Math.TreeFun.Tree
 import Math.TreeFun.Types
 import qualified Math.Clumpiness.Algorithms as Clump
-import qualified Math.Clumpiness.Types as ClumpType
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.ByteString.Lazy.Char8 as C
@@ -112,7 +111,6 @@ findClumpiness opts = do
                        $ inputTree
         propertyMap    = getPropertyMap inputSuperTree
         clumpResult    = Clump.generateClumpMap
-                         ClumpType.Clumpiness
                          (const True)
                          propertyMap
                          inputSuperTree
