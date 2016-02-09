@@ -52,7 +52,9 @@ options = Options
          <> help "Whether the input tree is in Haskell, JSON, or Lineage format\
                  \, where the Lineage format needs an additional field to\
                  \ specify what to use as the label\
-                 \(for instance, Lineage tissues)."
+                 \ (for instance, Lineage tissues). The format for JSON is\
+                 \ [{ \"nodeID\": \"ID\", \"nodeLabels\" [ \"Label\" ]  },\
+                 \ [RECURSION]]"
           )
       <*> option auto
           ( long "exclusivity"
@@ -99,9 +101,8 @@ findClumpiness opts = do
 
     let inputTree      = case inputFormat opts of
                             Haskell   -> read . C.unpack $ contents
-                            JSON      -> fromMaybe
-                                         (error "Could not parse file")
-                                       $ decode contents :: Tree NodeLabel
+                            JSON      -> either error id
+                                       $ eitherDecode contents :: Tree NodeLabel
                             Lineage x -> getLineageTree x
                                        . decodeLineageTree
                                        $ contents
