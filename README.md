@@ -10,6 +10,10 @@ Find the clumpiness of labels in a Haskell or JSON formatted tree.
 
 [Using a novel clumpiness measure to unite data with metadata: finding common sequence patterns in immune receptor germline V genes](http://www.sciencedirect.com/science/article/pii/S0167865516000234)
 
+## Installation
+
+`stack install find-clumpiness --resolver nightly`
+
 ## Usage
 
 Say we have a dendrogram where the leaves of the tree are labeled with species. Then we put our tree in JSON format, where we follow the rules of:
