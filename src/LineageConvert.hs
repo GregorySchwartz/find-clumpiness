@@ -9,6 +9,8 @@ clash database to the workable tree
 
 module LineageConvert
     ( lineageToTree
+    , decodeLineageTree
+    , getLineageTree
     ) where
 
 -- Standard
@@ -20,6 +22,7 @@ import Debug.Trace
 
 -- Cabal
 import qualified Data.Vector as V
+import qualified Data.ByteString.Lazy.Char8 as C
 import qualified Data.Text as T
 import Math.TreeFun.Types
 import Math.TreeFun.Tree
@@ -70,3 +73,22 @@ getChildren object = either error id
                    . flip parseEither object $ \obj -> do
                         children <- obj .: "children"
                         return children
+
+-- | Get the generic AST from the file
+decodeLineageTree :: C.ByteString -> Object
+decodeLineageTree contents = fromMaybe
+                             (error "JSON is not an object")
+                             (decode contents :: Maybe Object)
+
+-- | Get the lineage tree from a generic AST
+getLineageTree :: Label -> Object -> Tree NodeLabel
+getLineageTree label object = either error (lineageToTree label)
+                            . flip parseEither object $ \obj -> do
+                                germTree <- obj .: "tree"
+                                tree <- germTree .: "children"
+                                return . rootCheck tree $ germTree
+  where
+    -- Get the first branch point (sometimes there are additional nodes
+    -- right after the root for lineages that bypass the no root rule).
+    rootCheck [tree] _ = tree
+    rootCheck _ tree   = tree

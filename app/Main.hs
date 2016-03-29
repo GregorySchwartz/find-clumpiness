@@ -8,7 +8,6 @@ using the clumpiness metric
 -- Standard
 import Data.Maybe
 import Data.Tree
-import qualified Data.HashMap.Strict as Hash
 
 -- Cabal
 import Options.Applicative
@@ -19,10 +18,12 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.ByteString.Lazy.Char8 as C
 import Data.Aeson
-import qualified Data.Aeson.Types as AT
+import qualified Biobase.Newick as Newick
 
 -- Local
 import Types
+import Utility
+import NewickConvert
 import LineageConvert
 import TreeTransform
 import Print
@@ -31,6 +32,7 @@ import Print
 data Options = Options { input            :: Maybe String
                        , inputFormat      :: Format
                        , inputExclusivity :: Exclusivity
+                       , inputNewickLabel :: Maybe String
                        , output           :: Maybe String
                        }
 
@@ -67,6 +69,16 @@ options = Options
                  \ alphabetical)."
           )
       <*> optional ( strOption
+          ( long "newick-label"
+         <> short 'n'
+         <> metavar "(SEPARATOR, FIELD)"
+         <> help "In order to parse the Newick format, we need the labels to\
+                 \ look at clumpiness. Thus, we split the original label by\
+                 \ a separator and look at a specific field (1 indexed) in\
+                 \ order to get the label."
+          )
+        )
+      <*> optional ( strOption
           ( long "output"
          <> short 'o'
          <> metavar "FILE"
@@ -74,39 +86,57 @@ options = Options
           )
         )
 
--- | Get the generic AST from the file
-decodeLineageTree :: C.ByteString -> Object
-decodeLineageTree contents = fromMaybe
-                             (error "JSON is not an object")
-                             (decode contents :: Maybe Object)
+-- | Get the tree from a Haskell format
+haskellFormat :: Options -> IO (Tree NodeLabel)
+haskellFormat opts = do
+    contents <- case input opts of
+                    Nothing  -> getContents
+                    (Just x) -> readFile x
+    return . read $ contents
 
--- | Get the lineage tree from a generic AST
-getLineageTree :: Label -> Object -> Tree NodeLabel
-getLineageTree label object = either error (lineageToTree label)
-                            . flip AT.parseEither object $ \obj -> do
-                                germTree <- obj .: T.pack "tree"
-                                tree <- germTree .: T.pack "children"
-                                return . rootCheck tree $ germTree
-  where
-    -- Get the first branch point (sometimes there are additional nodes
-    -- right after the root for lineages that bypass the no root rule).
-    rootCheck [tree] _ = tree
-    rootCheck _ tree   = tree
-
-findClumpiness :: Options -> IO ()
-findClumpiness opts = do
+-- | Get the tree from a JSON format
+jsonFormat :: Options -> IO (Tree NodeLabel) 
+jsonFormat opts = do
     contents <- case input opts of
                     Nothing  -> C.getContents
                     (Just x) -> C.readFile x
+    return ((either error id . eitherDecode $ contents) :: Tree NodeLabel)
 
-    let inputTree      = case inputFormat opts of
-                            Haskell   -> read . C.unpack $ contents
-                            JSON      -> either error id
-                                       $ eitherDecode contents :: Tree NodeLabel
-                            Lineage x -> getLineageTree x
-                                       . decodeLineageTree
-                                       $ contents
-        inputSuperTree = convertToSuperTree
+-- | Get the tree from a Newick format
+newickFormat :: Options -> IO (Tree NodeLabel) 
+newickFormat opts = do
+    contents <- case input opts of
+                    Nothing  -> T.getContents
+                    (Just x) -> T.readFile x
+    let (sep, field) = case inputNewickLabel opts of
+                           Nothing  -> (Separator T.empty, Field 1)
+                           (Just x) -> newickSplitters
+                                       (read x :: (String, Int))
+
+    return
+        . newickToTree sep field
+        . head
+        . either error id
+        . Newick.newicksFromText
+        $ contents
+
+-- | Get the tree form a lineage fromat
+lineageFormat :: Options -> T.Text -> IO (Tree NodeLabel) 
+lineageFormat opts x = do
+    contents <- case input opts of
+                    Nothing  -> C.getContents
+                    (Just x) -> C.readFile x
+    return . getLineageTree x . decodeLineageTree $ contents
+
+findClumpiness :: Options -> IO ()
+findClumpiness opts = do
+    inputTree <- case inputFormat opts of
+                    Haskell   -> haskellFormat opts
+                    JSON      -> jsonFormat opts
+                    Newick    -> newickFormat opts
+                    Lineage x -> lineageFormat opts x
+    print inputTree
+    let inputSuperTree = convertToSuperTree
                        . filterExclusiveTree (inputExclusivity opts)
                        . innerToLeaves
                        $ inputTree

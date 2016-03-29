@@ -21,9 +21,12 @@ data NodeLabel = NodeLabel { nodeID     :: !T.Text
                            , nodeLabels :: !Labels
                            } deriving (Generic, Eq, Ord, Read, Show)
 
-data Format = Haskell | JSON | Lineage T.Text deriving (Read)
+data Format = Haskell | JSON | Newick | Lineage T.Text deriving (Read)
 
 data Exclusivity = Exclusive | AllExclusive | Majority deriving (Read)
+
+newtype Separator = Separator T.Text deriving (Show)
+newtype Field = Field Int deriving (Show)
 
 -- Simple
 type Label = T.Text
