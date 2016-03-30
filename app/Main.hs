@@ -135,7 +135,6 @@ findClumpiness opts = do
                     JSON      -> jsonFormat opts
                     Newick    -> newickFormat opts
                     Lineage x -> lineageFormat opts x
-    print inputTree
     let inputSuperTree = convertToSuperTree
                        . filterExclusiveTree (inputExclusivity opts)
                        . innerToLeaves
