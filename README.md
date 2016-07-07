@@ -12,7 +12,7 @@ Find the clumpiness of labels in a Haskell or JSON formatted tree.
 
 ## Installation
 
-`stack install find-clumpiness --resolver nightly`
+`stack install find-clumpiness`
 
 ## Usage
 
