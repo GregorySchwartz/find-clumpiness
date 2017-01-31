@@ -8,17 +8,18 @@ using the clumpiness metric
 -- Standard
 import Data.Maybe
 import Data.Tree
+import Data.Semigroup ((<>))
 
 -- Cabal
-import Options.Applicative
-import Math.TreeFun.Tree
-import Math.TreeFun.Types
-import qualified Math.Clumpiness.Algorithms as Clump
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.ByteString.Lazy.Char8 as C
 import Data.Aeson
+import Math.TreeFun.Tree
+import Math.TreeFun.Types
+import qualified Math.Clumpiness.Algorithms as Clump
 import qualified Biobase.Newick as Newick
+import Options.Applicative
 
 -- Local
 import Types

@@ -1,9 +1,9 @@
 name:                find-clumpiness
-version:             0.2.1.0
+version:             0.2.1.1
 synopsis:            Find the clumpiness of labels in a tree
 description:         Please see README.md
 homepage:            http://github.com/GregorySchwartz/find-clumpiness#readme
-license:             GPL-2
+license:             GPL-3
 license-file:        LICENSE
 author:              Gregory W. Schwartz
 maintainer:          gregory.schwartz@drexel.edu
