@@ -1,13 +1,13 @@
 name:                find-clumpiness
-version:             0.2.1.1
+version:             0.2.1.2
 synopsis:            Find the clumpiness of labels in a tree
-description:         Please see README.md
+description:         Use a clumpiness measure to find the aggregation relationship between labels inside of a tree.
 homepage:            http://github.com/GregorySchwartz/find-clumpiness#readme
 license:             GPL-3
 license-file:        LICENSE
 author:              Gregory W. Schwartz
-maintainer:          gregory.schwartz@drexel.edu
-copyright:           Copyright 2015 Gregory W. Schwartz
+maintainer:          gsch@mail.med.upenn.edu
+copyright:           Copyright 2017 Gregory W. Schwartz
 category:            Math
 build-type:          Simple
 -- extra-source-files:
@@ -38,7 +38,7 @@ library
 executable find-clumpiness
   hs-source-dirs:      app
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -O2
+  ghc-options:         -threaded -rtsopts -O2
   build-depends:       base
                      , find-clumpiness
                      , clumpiness
