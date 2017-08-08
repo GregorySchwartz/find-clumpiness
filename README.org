@@ -33,7 +33,9 @@ node in the tree. By default, predefined IDs are ignored and are automatically
 reset to be 0,1,.. etc. unique IDs (to use the predefined IDs, use =-p=). Then
 we can find the clumpiness of each label with every other label with
 
-=cat test.JSON | find-clumpiness --format "JSON"=
+#+BEGIN_SRC sh
+cat test.JSON | find-clumpiness --format "JSON"
+#+END_SRC
 
 Note that with multiple labels, we must treat the metric differently. The
 options are =Exclusive=, =AllExclusive=, and =Majority=. =Exclusive= ignores all
