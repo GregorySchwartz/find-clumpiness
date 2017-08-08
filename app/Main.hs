@@ -185,7 +185,7 @@ findClumpiness opts = do
                          inputSuperTree
 
     case output opts of
-        Nothing  -> T.putStrLn . printClumpList $ clumpResult
+        Nothing  -> T.putStr . printClumpList $ clumpResult
         (Just x) ->  T.writeFile x . printClumpList $ clumpResult
 
 main :: IO ()
