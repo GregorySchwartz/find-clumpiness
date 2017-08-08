@@ -24,7 +24,8 @@ Then we put our tree in JSON format, where we follow the rules of:
 
 #+BEGIN_EXAMPLE
 test.JSON [{ "nodeID": "ID", "nodeLabels": [ "LABEL1", "LABEL2", etc. ] },
-[RECURSION]] #+END_EXAMPLE
+[RECURSION]]
+#+END_EXAMPLE
 
 where =RECURSION= is a list of ={ "nodeID": "ID", "nodeLabels": [ "LABEL1",
 "LABEL2", etc. ] }, [RECURSION]= entries, and =ID= is a unique node ID for each
