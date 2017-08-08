@@ -42,8 +42,8 @@ options are =Exclusive=, =AllExclusive=, and =Majority=. =Exclusive= ignores all
 nodes with more than one label, =AllExclusive= looks at all nodes, treating a
 node with multiple labels as having all of those labels, and =Majority= converts
 nodes with multiple labels to one label by using the most frequent label, so a
-node with ="nodeLabels": [ "A", "A", "A", "B", "C" ]= would be converted to
-="nodeLabels": [ "A" ]=.
+node with src_text{"nodeLabels": [ "A", "A", "A", "B", "C" ]} would be converted to
+src_text{"nodeLabels": [ "A" ]}.
 
 This algorithm converts inner nodes (any non-leaf node) that have labels into
 leaves (unless =-E= is specified to ignore inner nodes), introducing a dummy
