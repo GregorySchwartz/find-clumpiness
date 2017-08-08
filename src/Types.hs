@@ -21,7 +21,7 @@ data NodeLabel = NodeLabel { nodeID     :: !T.Text
                            , nodeLabels :: !Labels
                            } deriving (Generic, Eq, Ord, Read, Show)
 
-data Format = Haskell | JSON | Newick | Lineage T.Text deriving (Read)
+data Format = JSON | RJSON | Haskell | Newick | Lineage T.Text deriving (Read)
 
 data Exclusivity = Exclusive | AllExclusive | Majority deriving (Read)
 

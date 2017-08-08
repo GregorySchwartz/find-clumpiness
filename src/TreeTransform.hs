@@ -12,20 +12,23 @@ module TreeTransform
     , getPropertyMap
     , innerToLeaves
     , filterExclusiveTree
+    , addUniqueNodeIDs
     ) where
 
 -- Standard
+import Control.Monad.State
+import Data.Function (on)
+import Data.Tree
+import qualified Data.Foldable as F
 import qualified Data.Map.Strict as Map
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
-import Data.Tree
-import qualified Data.Foldable as F
-import Data.Function (on)
 
 -- Cabal
 import qualified Data.Text as T
 import Math.TreeFun.Types
 import Math.TreeFun.Tree
+import TextShow (showt)
 
 -- Local
 import Types
@@ -88,3 +91,20 @@ exclusiveLabel Majority xs          = Seq.singleton
                                     . Map.fromListWith (+)
                                     . flip zip [1,1..]
                                     . F.toList $ xs
+
+-- | Add unique node IDs to a tree, replacing any previous node IDs.
+addUniqueNodeIDs :: Tree NodeLabel -> Tree NodeLabel
+addUniqueNodeIDs tree = fst . runState (go tree) $ 0
+  where
+    go :: Tree NodeLabel -> State Int (Tree NodeLabel)
+    go tree = do
+        newRootLabel <- updateRootLabel . rootLabel $ tree
+        newSubForest <- mapM go . subForest $ tree
+        return $ tree { rootLabel = newRootLabel
+                      , subForest = newSubForest
+                      }
+    updateRootLabel :: NodeLabel -> State Int NodeLabel
+    updateRootLabel n = do
+        nId <- get
+        modify (+ 1)
+        return $ n { nodeID = showt nId }

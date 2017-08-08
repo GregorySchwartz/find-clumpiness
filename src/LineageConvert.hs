@@ -18,7 +18,6 @@ import Data.Maybe
 import qualified Data.Sequence as Seq
 import Data.Tree
 import qualified Data.HashMap.Strict as Hash
-import Debug.Trace
 
 -- Cabal
 import qualified Data.Vector as V
@@ -77,7 +76,7 @@ getChildren object = either error id
 -- | Get the generic AST from the file
 decodeLineageTree :: C.ByteString -> Object
 decodeLineageTree contents = fromMaybe
-                             (error "JSON is not an object")
+                             (error "Input is not a JSON object")
                              (decode contents :: Maybe Object)
 
 -- | Get the lineage tree from a generic AST
