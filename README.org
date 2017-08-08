@@ -45,13 +45,13 @@ nodes with multiple labels to one label by using the most frequent label, so a
 node with
 
 #+BEGIN_EXAMPLE
-"nodeLabels": [ "A", "A", "A", "B", "C" ]}
+"nodeLabels": [ "A", "A", "A", "B", "C" ]
 #+END_EXAMPLE
 
 would be converted to
 
 #+BEGIN_EXAMPLE
-src_text{"nodeLabels": [ "A" ]}.
+"nodeLabels": [ "A" ]
 #+END_EXAMPLE
 
 This algorithm converts inner nodes (any non-leaf node) that have labels into
