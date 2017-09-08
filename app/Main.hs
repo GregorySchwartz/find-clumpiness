@@ -5,30 +5,30 @@ Takes a Haskell or JSON tree and finds the relationship between labels
 using the clumpiness metric
 -}
 
--- Standard
-import Data.Maybe
-import Data.Tree
-import Data.Semigroup ((<>))
-
--- Cabal
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.ByteString.Lazy.Char8 as C
+-- Remote
 import Data.Aeson
+import Data.Maybe
+import Data.Semigroup ((<>))
+import Data.Tree
 import Math.TreeFun.Tree
 import Math.TreeFun.Types
-import qualified Math.Clumpiness.Algorithms as Clump
-import qualified Biobase.Newick as Newick
 import Options.Applicative
+import qualified Biobase.Newick as Newick
+import qualified Data.ByteString.Lazy.Char8 as C
+import qualified Data.Sequence as Seq
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import qualified Math.Clumpiness.Algorithms as Clump
 
 -- Local
+import Clumpiness
+import LineageConvert
+import NewickConvert
+import Print
+import RJSONConvert
+import TreeTransform
 import Types
 import Utility
-import NewickConvert
-import RJSONConvert
-import LineageConvert
-import TreeTransform
-import Print
 
 -- Command line arguments
 data Options = Options { input            :: Maybe String
@@ -53,7 +53,7 @@ options = Options
       <*> option auto
           ( long "format"
          <> short 'f'
-         <> metavar "[JSON] | RJSON | Haskell | Lineage LABEL"
+         <> metavar "[JSON] | RJSON | Haskell HaskellFormat | Lineage LABEL"
          <> value JSON
          <> help "Whether the input tree is in JSON, RJSON, Haskell, or Lineage format.\
                  \ The format for JSON is\
@@ -62,7 +62,9 @@ options = Options
                  \ \"toJSON(as.list(as.Node(dendrogram), mode = \"explicit\", unname = TRUE))\"\
                  \ using the data.tree and jsonlite libraries,\
                  \ where \"dendrogram\" is a dendrogram object in R.\
-                 \ The format for Haskell is \"Tree NodeLabel\" from this library.\
+                 \ The format for Haskell STRING is one of\
+                 \ \"Tree NodeLabel\" (BaseFormat) from this library or\
+                 \ \"Tree (Seq Text)\" (TreeFormat).\
                  \ The Lineage format needs an additional field to\
                  \ specify what to use as the label\
                  \ (for instance, Lineage tissues).\
@@ -110,12 +112,15 @@ options = Options
         )
 
 -- | Get the tree from a Haskell format
-haskellFormat :: Options -> IO (Tree NodeLabel)
-haskellFormat opts = do
+haskellFormat :: Options -> HaskellFormat -> IO (Tree NodeLabel)
+haskellFormat opts format = do
     contents <- case input opts of
                     Nothing  -> getContents
                     (Just x) -> readFile x
-    return . read $ contents
+    return . makeWork format $ contents
+  where
+    makeWork BaseFormat x       = makeWorkable (read x :: Tree NodeLabel)
+    makeWork TreeFormat x       = makeWorkable (read x :: Tree (Seq.Seq T.Text))
 
 -- | Get the tree from a JSON format
 jsonFormat :: Options -> IO (Tree NodeLabel)
@@ -162,27 +167,18 @@ rJsonFormat opts = do
 findClumpiness :: Options -> IO ()
 findClumpiness opts = do
     inputTree <- case inputFormat opts of
-                    Haskell   -> haskellFormat opts
-                    JSON      -> jsonFormat opts
-                    RJSON     -> rJsonFormat opts
-                    Newick    -> newickFormat opts
-                    Lineage x -> lineageFormat opts x
-    let inputSuperTree = convertToSuperTree
-                       . filterExclusiveTree (inputExclusivity opts)
-                       . (\ x -> if excludeInnerFlag opts
-                                    then x
-                                    else innerToLeaves x
-                         )
-                       . (\ x -> if predefinedIDs opts
-                                    then x
-                                    else addUniqueNodeIDs x
-                         )
-                       $ inputTree
-        propertyMap    = getPropertyMap inputSuperTree
-        clumpResult    = Clump.generateClumpMap
-                         (const True)
-                         propertyMap
-                         inputSuperTree
+                    Haskell x      -> haskellFormat opts x
+                    JSON           -> jsonFormat opts
+                    RJSON          -> rJsonFormat opts
+                    Newick         -> newickFormat opts
+                    Lineage x      -> lineageFormat opts x
+
+    let clumpResult =
+            getClumpiness
+                (inputExclusivity opts)
+                (predefinedIDs opts)
+                (excludeInnerFlag opts)
+                inputTree
 
     case output opts of
         Nothing  -> T.putStr . printClumpList $ clumpResult

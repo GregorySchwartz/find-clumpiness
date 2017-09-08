@@ -1,5 +1,5 @@
 name:                find-clumpiness
-version:             0.2.2.0
+version:             0.2.3.0
 synopsis:            Find the clumpiness of labels in a tree
 description:         Use a clumpiness measure to find the aggregation relationship between labels inside of a tree.
 homepage:            http://github.com/GregorySchwartz/find-clumpiness#readme
@@ -21,13 +21,15 @@ library
                      , RJSONConvert
                      , LineageConvert
                      , TreeTransform
+                     , Clumpiness
                      , Print
   build-depends:       base >= 4.7 && < 5
-                     , clumpiness
                      , BiobaseNewick
                      , aeson
                      , bytestring
+                     , clumpiness
                      , containers
+                     , hierarchical-clustering
                      , listsafe
                      , mtl
                      , text
