@@ -6,7 +6,7 @@ using the clumpiness metric
 -}
 
 -- Remote
-import Data.Aeson
+import Data.Aeson hiding (Options)
 import Data.Maybe
 import Data.Semigroup ((<>))
 import Data.Tree

@@ -1,5 +1,5 @@
 name:                find-clumpiness
-version:             0.2.3.0
+version:             0.2.3.1
 synopsis:            Find the clumpiness of labels in a tree
 description:         Use a clumpiness measure to find the aggregation relationship between labels inside of a tree.
 homepage:            http://github.com/GregorySchwartz/find-clumpiness#readme
