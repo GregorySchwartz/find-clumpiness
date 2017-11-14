@@ -63,8 +63,9 @@ options = Options
                  \ using the data.tree and jsonlite libraries,\
                  \ where \"dendrogram\" is a dendrogram object in R.\
                  \ The format for Haskell STRING is one of\
-                 \ \"Tree NodeLabel\" (BaseFormat) from this library or\
-                 \ \"Tree (Seq Text)\" (TreeFormat).\
+                 \ \"Tree NodeLabel\" (BaseFormat) from this library,\
+                 \ \"Tree (Seq Text)\" (TreeFormat), or\
+                 \ \"Dendrogram (Seq Text)\" (DendrogramFormat).\
                  \ The Lineage format needs an additional field to\
                  \ specify what to use as the label\
                  \ (for instance, Lineage tissues).\
